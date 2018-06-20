@@ -33,12 +33,18 @@
 				<groupId>io.gatling.highcharts</groupId>
 				<artifactId>gatling-charts-highcharts</artifactId>
 				<version>${gatling.version}</version>
+                <scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.scala-lang</groupId>
 				<artifactId>scala-library</artifactId>
 				<version>${scala.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-reflect</artifactId>
+                <version>2.12.4</version>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -74,25 +80,20 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>net.alchim31.maven</groupId>
-				<artifactId>scala-maven-plugin</artifactId>
+				<!-- Run all [matching] tests] on mvn test -->
+				<groupId>io.gatling</groupId>
+				<artifactId>gatling-maven-plugin</artifactId>
+				<version>2.2.4</version>
+                <configuration>
+                </configuration>
+
 				<executions>
 					<execution>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-						<configuration>
-							<args>
-								<arg>-Ybackend:GenBCode</arg>
-								<arg>-Ydelambdafy:method</arg>
-								<arg>-target:jvm-1.8</arg>
-								<arg>-deprecation</arg>
-								<arg>-feature</arg>
-								<arg>-unchecked</arg>
-								<arg>-language:implicitConversions</arg>
-								<arg>-language:postfixOps</arg>
-							</args>
-						</configuration>
+						<phase>test</phase>
+						<goals><goal>execute</goal></goals>
+                        <configuration>
+                            <simulationClass>demo.DemoSimulation</simulationClass>
+                        </configuration>
 					</execution>
 				</executions>
 			</plugin>
