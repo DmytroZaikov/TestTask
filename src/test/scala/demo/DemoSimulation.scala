@@ -35,18 +35,22 @@ class DemoSimulation extends Simulation{
       .queryParam("currency", "EUR")
       .queryParam("coin", "0.2")
       .queryParam("amount", "5")
-      .check(jsonPath(TestConfig.exitCondition).saveAs("endCondition")))
-    .pause(4)
-
+      .check(jsonPath(TestConfig.exitCondition)
+        .transform(endCondition => {endCondition.toFloat})
+        .saveAs("endCondition")))
+      .pause(4)
 
   val demoScenario: ScenarioBuilder = scenario("DemoSimulation")
     .exec(
       getSessionId,
-      asLongAs(session => session.get("endCondition").asOption[String].getOrElse("0.00") == "0.00"){runGame}
+      asLongAs(session => session.get("endCondition").asOption[Float].getOrElse(0.00) == 0.00){runGame}
     )
 
   setUp(
     demoScenario.inject(atOnceUsers(1))
-  ).protocols(httpConf).maxDuration(60)
+  ).assertions(global.responseTime.max.lt(100))
+    .assertions(forAll.failedRequests.percent.lte(0))
+    .protocols(httpConf)
+    .maxDuration(60)
 
 }
