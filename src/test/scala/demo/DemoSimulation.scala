@@ -7,10 +7,10 @@ import io.gatling.http.Predef._
 
 class DemoSimulation extends Simulation{
 
-  private val baseUrl = "https://demo.yggdrasilgaming.com/game.web"
+  private val gameId = 7316
 
   private val httpConf = http
-    .baseURL(baseUrl)
+    .baseURL(TestConfig.baseUrl)
     .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     .acceptLanguageHeader("en-US,en;q=0.5")
     .acceptEncodingHeader("gzip, deflate")
@@ -21,7 +21,7 @@ class DemoSimulation extends Simulation{
       .get("/service")
       .queryParam("fn", "authenticate")
       .queryParam("org","Demo")
-      .queryParam("gameid","7316")
+      .queryParam("gameid", gameId)
       .check(jsonPath("$.data.sessid").saveAs("sessid")
       )
   )
@@ -30,23 +30,23 @@ class DemoSimulation extends Simulation{
     http("runGame")
       .get("/service")
       .queryParam("fn", "play")
-      .queryParam("gameid", "7316")
+      .queryParam("gameid", gameId)
       .queryParam("sessid", "${sessid}")
       .queryParam("currency", "EUR")
       .queryParam("coin", "0.2")
       .queryParam("amount", "5")
-      .check(jsonPath("$.data.wager.bets[0].wonamount").saveAs("endCondition")))
+      .check(jsonPath(TestConfig.exitCondition).saveAs("endCondition")))
     .pause(4)
 
 
-  val scn: ScenarioBuilder = scenario("DemoSimulation")
+  val demoScenario: ScenarioBuilder = scenario("DemoSimulation")
     .exec(
       getSessionId,
       asLongAs(session => session.get("endCondition").asOption[String].getOrElse("0.00") == "0.00"){runGame}
     )
 
   setUp(
-    scn.inject(atOnceUsers(1))
+    demoScenario.inject(atOnceUsers(1))
   ).protocols(httpConf).maxDuration(60)
 
 }
