@@ -48,7 +48,7 @@ class DemoSimulation extends Simulation{
 
   setUp(
     demoScenario.inject(atOnceUsers(1))
-  ).assertions(global.responseTime.max.lt(100))
+  ).assertions(global.responseTime.max.lt(1000))
     .assertions(forAll.failedRequests.percent.lte(0))
     .protocols(httpConf)
     .maxDuration(60)
